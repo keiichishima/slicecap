@@ -21,8 +21,9 @@ After the `--` option, you can specify a subprocess to process the
 splitted pcap data.  In the above example, the splitted data will just
 redirected into files.  In the subprocess definition, you can use the
 following keywords that are replaced dynamically when executed.  Since
-the replacement will be done by Python formatting function, you can
-specify formatting rules using the standard Python text formatter.
+the replacement will be done by the Python text formatting function,
+you can specify formatting rules using the standard Python text
+formatter syntax.
 
 - `OFFSET`: The file offset value in bytes.
 - `SIZE`: The size of the pcap data part.
