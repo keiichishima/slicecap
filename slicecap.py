@@ -183,7 +183,7 @@ def call_subcommand(splitcap, frag_id):
             _proc.stdin.write(_data)
             _data_left -= len(_data)
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--maxgap', type=int, dest='maxgap',
                         default=3600)
@@ -213,4 +213,5 @@ if __name__ == '__main__':
         j.join()
         
     
-                    
+if __name__ == '__main__':
+    main()
