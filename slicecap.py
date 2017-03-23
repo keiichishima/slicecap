@@ -224,15 +224,9 @@ class Slicecap(object):
         raise ValueError
 
     def call_subcommands(self):
-        jobs = []
-        for _frag_id in range(self._options.nslice):
-            j = multiprocessing.Process(
-                target=self._call_subcommand_for_frag_id,
-                args=(_frag_id,))
-            jobs.append(j)
-            j.start()
-        for j in jobs:
-            j.join()
+        with multiprocessing.Pool() as _pool:
+            _pool.map(func=self._call_subcommand_for_frag_id,
+                      iterable=range(len(self._offsets)))
 
     def _call_subcommand_for_frag_id(self, frag_id):
         # Replace fragment dependent variables specified by the user
