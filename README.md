@@ -1,10 +1,14 @@
 # Slice a large pcap file and process in parallel
 
+## Install
+
+    python setup.py install
+
 ## Usage
 
 The below is an example to split a pcap file into 10 files.
 
-    slicecap.py -r source.pcap -n 10 -- "cat > dest-{FRAG_ID}.pcap"
+    slicecap -r source.pcap -n 10 -- "cat > dest-{FRAG_ID}.pcap"
 
 The `-r` or `--infile` option specifies input pcap file to slice.
 Stdin is not acceptable because `slicecap` will change file handle
