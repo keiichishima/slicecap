@@ -198,24 +198,24 @@ class Slicecap(object):
         # Check if the file position is likely to match the pcap
         # pkthdr format by shifting the file pointer by 1 byte.
         for _off_diff in range(len(data) - 16):
-            pph = PcapPkthdr()
-            pph.unpack_header(data[_off_diff:_off_diff + 16],
+            _pph = PcapPkthdr()
+            _pph.unpack_header(data[_off_diff:_off_diff + 16],
                               self._file_header.byte_order)
             # If the timestamp value is smaller than the value seen
             # previously, skip.
-            if pph.tv_sec < self._base_tv_sec:
+            if _pph.tv_sec < self._base_tv_sec:
                 continue
             # If the difference of this timestamp value and the value
             # seen before is grater than the maxgap value, skip.
-            if pph.tv_sec - self._base_tv_sec > self._options.maxgap:
+            if _pph.tv_sec - self._base_tv_sec > self._options.maxgap:
                 continue
             # If the caplen value is greater than the snaplen value,
             # skip.
-            if pph.caplen > self._file_header.snaplen:
+            if _pph.caplen > self._file_header.snaplen:
                 continue
             # If the len value is greater than the maximum media frame
             # size, skip.
-            #if pph.len > MAX_LINK_FRAME_SIZE:
+            #if _pph.len > MAX_LINK_FRAME_SIZE:
             #    continue
             #
             # XXX check frame contents for better validation
