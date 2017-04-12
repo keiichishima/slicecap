@@ -134,8 +134,8 @@ class Slicecap(object):
         self._options = options
         self._size = os.stat(self._options.infile).st_size
         self._frag_size = self._size // self._options.nslice
-        self._base_tv_sec = 0
-        self._base_tv_usec = 0
+        self._tv_sec_anchor = 0
+        self._tv_usec_anchor = 0
         self._offsets = []
         self._sizes = []
 
@@ -167,8 +167,8 @@ class Slicecap(object):
             pph = PcapPkthdr()
             pph.unpack_header(_pfo.read(16),
                               self._file_header.byte_order)
-            self._base_tv_sec = pph.tv_sec
-            self._base_tv_usec = pph.tv_usec
+            self._tv_sec_anchor = pph.tv_sec
+            self._tv_usec_anchor = pph.tv_usec
 
     def guess_frag_offsets_and_sizes(self):
         '''Try to slice the source pcap file into N files specified by the
@@ -203,11 +203,11 @@ class Slicecap(object):
                               self._file_header.byte_order)
             # If the timestamp value is smaller than the value seen
             # previously, skip.
-            if _pph.tv_sec < self._base_tv_sec:
+            if _pph.tv_sec < self._tv_sec_anchor:
                 continue
             # If the difference of this timestamp value and the value
             # seen before is grater than the maxgap value, skip.
-            if _pph.tv_sec - self._base_tv_sec > self._options.maxgap:
+            if _pph.tv_sec - self._tv_sec_anchor > self._options.maxgap:
                 continue
             # If the caplen value is greater than the snaplen value,
             # skip.
@@ -219,7 +219,15 @@ class Slicecap(object):
             #    continue
             #
             # XXX check frame contents for better validation
+
+            # Update the time anchor.
+            self._tv_sec_anchor = _pph.tv_sec
+            self._tv_usec_anchor = _pph.tv_usec
+
+            # Return the guessed offset.
             return _pcap_off_guess + _off_diff
+
+        # Failed to find a pcap pkthdr.
         print('could not find pcap pkthdr at frag_id={}'.format(frag_id))
         raise ValueError
 
