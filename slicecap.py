@@ -253,6 +253,7 @@ class Slicecap(object):
                     _data = _pfo.read(_data_left)
                 _proc.stdin.write(_data)
                 _data_left -= len(_data)
+        _proc.stdin.flush()
 
 def main():
     parser = argparse.ArgumentParser()
