@@ -12,7 +12,7 @@ except ImportError:
     read_md = lambda f: open(f, 'r').read()
 
 setup(name='slicecap',
-      version='0.0.1',
+      version='0.1.0',
       description='Slice a pcap file into pieces and process in parallel',
       long_description=read_md('README.md'),
       author='Keiichi SHIMA',

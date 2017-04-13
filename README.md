@@ -8,7 +8,7 @@
 
 The below is an example to slice a pcap file into 10 files.
 
-    slicecap -r source.pcap -n 10 -- "cat - > dest-{FRAG_ID}.pcap"
+    slicecap -r source.pcap -n 10 -- "cat - > dest-{SLICE_ID}.pcap"
 
 The `-r` or `--infile` option specifies input pcap file to slice.
 Stdin is not acceptable because `slicecap` will change file handle
@@ -31,7 +31,7 @@ formatter syntax.
 
 - `OFFSET`: The file offset value in bytes.
 - `SIZE`: The size of the sliced pcap data.
-- `FRAG_ID`: The ID number (begins from 0) of the sliced file.
+- `SLICE_ID`: The ID number (begins from 0) of the sliced file.
 
 
 ## Bug Reports
