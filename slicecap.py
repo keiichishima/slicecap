@@ -121,7 +121,7 @@ class PcapPkthdr(object):
          self._caplen,
          self._len) = struct.unpack(
              byte_order + '4L', data)
-       
+
 class Slicecap(object):
     '''The Slicecap class keeps the input pcap file information and user
     specified parameters required to slice and process data.  This
@@ -133,7 +133,7 @@ class Slicecap(object):
         self._file_header = PcapFileHeader()
         self._options = options
         self._size = os.stat(self._options.infile).st_size
-        self._frag_size = self._size // self._options.nslice
+        self._slice_size = self._size // self._options.nslice
         self._tv_sec_anchor = 0
         self._tv_usec_anchor = 0
         self._offsets = []
@@ -170,7 +170,7 @@ class Slicecap(object):
             self._tv_sec_anchor = pph.tv_sec
             self._tv_usec_anchor = pph.tv_usec
 
-    def guess_frag_offsets_and_sizes(self):
+    def guess_slice_offsets_and_sizes(self):
         '''Try to slice the source pcap file into N files specified by the
         command line parameter.  The offset and size values of each
         sliced fragment are stored in self._offsets and self._sizes
@@ -178,16 +178,16 @@ class Slicecap(object):
 
         '''
         with open(self._options.infile, 'rb') as _pfo:
-            for _frag_id in range(self._options.nslice):
-                _off = self._guess_offset_of_frag_id(_pfo, _frag_id)
+            for _slice_id in range(self._options.nslice):
+                _off = self._guess_offset_of_slice_id(_pfo, _slice_id)
                 self._offsets.append(_off)
-                if _frag_id > 0:
-                    self._sizes.append(_off - self._offsets[_frag_id - 1])
+                if _slice_id > 0:
+                    self._sizes.append(_off - self._offsets[_slice_id - 1])
             self._sizes.append(self._size - self._offsets[-1])
 
-    def _guess_offset_of_frag_id(self, pfo, frag_id):
+    def _guess_offset_of_slice_id(self, pfo, slice_id):
         # Seek the file pointer to guessed position.
-        _pcap_off_guess = frag_id * self._frag_size
+        _pcap_off_guess = slice_id * self._slice_size
         pfo.seek(_pcap_off_guess, 0)
 
         # From the guessed position, read (snaplen + LLHDR len +
@@ -228,7 +228,7 @@ class Slicecap(object):
             return _pcap_off_guess + _off_diff
 
         # Failed to find a pcap pkthdr.
-        print('could not find pcap pkthdr at frag_id={}'.format(frag_id))
+        print('could not find pcap pkthdr at slice_id={}'.format(slice_id))
         raise ValueError
 
     def call_subcommands(self):
@@ -237,23 +237,23 @@ class Slicecap(object):
         else:
             _npara = int(self._options.npara)
         with multiprocessing.Pool(_npara) as _pool:
-            _pool.map(func=self._call_subcommand_for_frag_id,
+            _pool.map(func=self._call_subcommand_for_slice_id,
                       iterable=range(len(self._offsets)))
 
-    def _call_subcommand_for_frag_id(self, frag_id):
-        # Replace fragment dependent variables specified by the user
+    def _call_subcommand_for_slice_id(self, slice_id):
+        # Replace slice dependent variables specified by the user
         # to actual values.
-        _offset = self._offsets[frag_id]
-        _size = self._sizes[frag_id]
+        _offset = self._offsets[slice_id]
+        _size = self._sizes[slice_id]
         _subcmd = ' '.join([w.format(OFFSET=_offset,
                                      SIZE=_size,
-                                     FRAG_ID=frag_id)
+                                     SLICE_ID=slice_id)
                             for w in self._options.subcmdargs])
 
         _proc = subprocess.Popen(_subcmd,
                                  stdin=subprocess.PIPE,
                                  shell=True)
-    
+
         _proc.stdin.write(self._file_header.pack_header())
         with open(self._options.infile, 'rb') as _pfo:
             _pfo.seek(_offset)
@@ -286,8 +286,8 @@ def main():
     options = parser.parse_args()
 
     sc = Slicecap(options)
-    sc.guess_frag_offsets_and_sizes()
+    sc.guess_slice_offsets_and_sizes()
     sc.call_subcommands()
-    
+
 if __name__ == '__main__':
     main()
