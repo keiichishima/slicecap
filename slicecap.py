@@ -156,11 +156,11 @@ class Slicecap(object):
     @property
     def offsets(self):
         return self._offsets
-       
+
     @property
     def sizes(self):
         return self._sizes
-       
+
     def _unpack_file_header(self):
         with open(self._options.infile, 'rb') as _pfo:
             self._file_header.unpack_header(_pfo.read(24))
