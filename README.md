@@ -21,6 +21,11 @@ The `-g` or `--maxgap` option specifies the maximum time difference
 (in seconds) used to compare packet timestamps to find the pcap pkthdr
 boundary.  The default value is 3600.
 
+The `-p` or `--parallel` option specifies the maximum number of
+parallel subprocesses.  The default value is automatically determined
+based on the number of cores of the host node.  It doesn't make sense
+to specify a larger value than the number of cores.
+
 After the `--` option, you can specify a subprocess to process the
 sliced pcap data.  In the above example, the sliced data will just
 redirected into files.  In the subprocess definition, you can use the

@@ -232,7 +232,11 @@ class Slicecap(object):
         raise ValueError
 
     def call_subcommands(self):
-        with multiprocessing.Pool() as _pool:
+        if self._options.npara == 'auto':
+            _npara = None
+        else:
+            _npara = int(self._options.npara)
+        with multiprocessing.Pool(_npara) as _pool:
             _pool.map(func=self._call_subcommand_for_frag_id,
                       iterable=range(len(self._offsets)))
 
@@ -267,10 +271,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--maxgap', type=int, dest='maxgap',
                         default=3600,
-                        help='maximum packet interval for pcap pkthdr validation ')
+                        help='maximum packet interval for pcap pkthdr gap validation')
     parser.add_argument('-n', '--number', type=int, dest='nslice',
                         default=2,
                         help='number of sliced fragments')
+    parser.add_argument('-p', '--parallel', type=str, dest='npara',
+                        default='auto',
+                        help='maximum number of parallel processes')
     parser.add_argument('-r', '--infile', type=str, dest='infile',
                         required=True,
                         help='source pcap file')
